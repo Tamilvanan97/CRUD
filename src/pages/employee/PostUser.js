@@ -1,6 +1,6 @@
 import "./PostUser.css";
 import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const PostUser = () => {
@@ -10,6 +10,8 @@ const PostUser = () => {
         phone: "",
         department: ""
     });
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ const PostUser = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formData);
+        setLoading(true);
 
         try {
             const response = await fetch("http://localhost:8080/api/employee", {
@@ -43,12 +45,16 @@ const PostUser = () => {
             navigate("/");
         } catch (error) {
             console.error("Error creating employee:", error.message);
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <div className="center-form">
             <h1>Post New Employee</h1>
+            {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicName">
                     <Form.Control
@@ -57,6 +63,7 @@ const PostUser = () => {
                         placeholder="Enter name"
                         value={formData.name}
                         onChange={handleInputChange}
+                        required
                     />
                 </Form.Group>
                 <Form.Group controlId="formBasicEmail">
@@ -66,6 +73,7 @@ const PostUser = () => {
                         placeholder="Enter email"
                         value={formData.email}
                         onChange={handleInputChange}
+                        required
                     />
                 </Form.Group>
                 <Form.Group controlId="formBasicPhone">
@@ -75,6 +83,7 @@ const PostUser = () => {
                         placeholder="Enter phone"
                         value={formData.phone}
                         onChange={handleInputChange}
+                        required
                     />
                 </Form.Group>
                 <Form.Group controlId="formBasicDepartment">
@@ -84,10 +93,11 @@ const PostUser = () => {
                         placeholder="Enter department"
                         value={formData.department}
                         onChange={handleInputChange}
+                        required
                     />
                 </Form.Group>
-                <Button variant="primary" type="submit" className="w-100">
-                    Post Employee
+                <Button variant="primary" type="submit" className="w-100" disabled={loading}>
+                    {loading ? 'Posting...' : 'Post Employee'}
                 </Button>
             </Form>
         </div>
